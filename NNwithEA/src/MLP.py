@@ -1,4 +1,17 @@
+from scipy.optimize import minimize
 import numpy as np
+
+def train_with_backprop(mlp, X_train, y_train, X_val, y_val):
+    initial_genome = np.random.randn(mlp.n_params())
+
+    def objective(genome):
+        return mlp.calculate_mse(X_train, y_train, genome)
+
+    result = minimize(objective, initial_genome, method='L-BFGS-B', options={'maxiter':500})
+    best_genome = result.x
+
+    mse = mlp.calculate_mse(X_val, y_val, best_genome)
+    return best_genome, mse
 
 class SimpleMLP:
     def __init__(self, n_in, n_hidden, n_out):
