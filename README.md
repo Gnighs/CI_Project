@@ -22,6 +22,7 @@ python main.py
 The output should appear printed in the terminal.
 
 ## Project Architecture
+```
 CI_Project/
 │
 ├── README.md           # Project description and documentation
@@ -31,3 +32,4 @@ CI_Project/
 └── src/                # Source code directory
     ├── simple_mlp.py   # Implements the Simple Multi-Layer Perceptron (MLP)
     └── optimizer.py    # Implements the Evolutionary Algorithm
+```
