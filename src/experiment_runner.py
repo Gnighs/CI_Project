@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from src.optimizer import GeneticAlgorithm, CMAES, LBFGSB
+from src.optimizer import EvolutionaryAlgorithm, CMAES, LBFGSB
 from src.simple_mlp import SimpleMLP
 
 
@@ -21,8 +21,8 @@ class ExperimentRunner:
         start_time = time.time()
         
         if method_name == "GA":
-            optimizer = GeneticAlgorithm(mlp, X_train, y_train,
-                                        pop_size=30, n_generations=100)
+            optimizer = EvolutionaryAlgorithm(mlp, X_train, y_train,
+                                        pop_size=30, n_generations=100, selection_method='tournament')
             best_genome, history = optimizer.run()
         elif method_name == "CMAES":
             optimizer = CMAES(mlp, X_train, y_train,

@@ -2,8 +2,9 @@ import numpy as np
 import cma
 from scipy.optimize import minimize
 from abc import ABC, abstractmethod
+import random
 
-class GeneticBase(ABC):
+class BaseClass(ABC):
     def __init__(self, mlp, X, y):
         self.mlp = mlp
         self.X = X
@@ -36,15 +37,17 @@ class GeneticBase(ABC):
 
 
 
-class GeneticAlgorithm(GeneticBase):
+class EvolutionaryAlgorithm(BaseClass):
     def __init__(self, mlp, X, y, pop_size=20, mutation_rate=0.1,
-                 mutation_scale=0.1, n_generations=50, n_elite=1):
+                 mutation_scale=0.1, n_generations=50, n_elite=5,
+                 selection_method = 'roulette'):
         super().__init__(mlp, X, y)
         self.pop_size = pop_size
         self.mutation_rate = mutation_rate
         self.mutation_scale = mutation_scale
         self.n_generations = n_generations
         self.n_elite = n_elite
+        self.selection_method = selection_method
 
         self.genome_length = mlp.n_params()
         self.population = [np.random.randn(self.genome_length)
@@ -58,11 +61,24 @@ class GeneticAlgorithm(GeneticBase):
             'diversity': []
         }
 
-    def _select_parents(self, fitnesses):
+    def _roulette_selection(self, fitnesses):
         shifted = fitnesses - np.min(fitnesses) + 1e-6
         probs = shifted / np.sum(shifted)
         idx = np.random.choice(len(self.population), size=2, p=probs, replace=False)
         return self.population[idx[0]], self.population[idx[1]]
+
+
+    def _tournament_selection(self, fitnesses, k=4):
+        idx = np.random.choice(len(self.population), size=k, replace=False)
+        selected = sorted(idx, key=lambda i: fitnesses[i], reverse=True)
+        return self.population[selected[0]], self.population[selected[1]]
+
+
+    def _select_parents(self, fitnesses):
+        if self.selection_method == 'roulette':
+            return self._roulette_selection(fitnesses)
+        elif self.selection_method == 'tournament':
+            return self._tournament_selection(fitnesses, k=3)
 
 
     def _crossover(self, parent1, parent2):
@@ -89,24 +105,37 @@ class GeneticAlgorithm(GeneticBase):
             self.history['std_fitness'].append(np.std(fitnesses))
             self.history['diversity'].append(self._calculate_diversity(self.population))
 
+
+            # Selection phase, roulette or tournament
+
+            parent_pool = []
+
+            for _ in range(self.pop_size // 2): # Each pair produces two offspring
+                p1, p2 = self._select_parents(fitnesses)
+                parent_pool.append((p1, p2))
+
+
+            # Reproduction phase
+            offspring = []
+            for (p1, p2) in parent_pool:
+                c1, c2 = self._crossover(p1, p2)
+                offspring.append(self._mutate(c1))
+                offspring.append(self._mutate(c2))
+
+            # Replacement phase
+
             elite_indices = np.argsort(fitnesses)[-self.n_elite:]
             elites = [self.population[i].copy() for i in elite_indices]
-            new_population = elites.copy()
 
-            while len(new_population) < self.pop_size:
-                p1, p2 = self._select_parents(fitnesses)
-                c1, c2 = self._crossover(p1, p2)
-                new_population.append(self._mutate(c1))
-                if len(new_population) < self.pop_size:
-                    new_population.append(self._mutate(c2))
+            random.shuffle(offspring)
 
-            self.population = new_population
+            self.population = elites + offspring[:self.pop_size - self.n_elite]
 
         best_idx = np.argmax(fitnesses)
         return self.population[best_idx], self.history
 
 
-class CMAES(GeneticBase):
+class CMAES(BaseClass):
     def __init__(self, mlp, X, y, pop_size=20, n_generations=50, sigma0=0.5):
         super().__init__(mlp, X, y)
         self.pop_size = pop_size
@@ -150,7 +179,7 @@ class CMAES(GeneticBase):
         return es.result.xbest, self.history
 
 
-class LBFGSB(GeneticBase):
+class LBFGSB(BaseClass):
     def __init__(self, mlp, X, y, maxiter=500):
         super().__init__(mlp, X, y)
 
