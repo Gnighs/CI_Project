@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from src.optimizer import EvolutionaryAlgorithm, CMAES, LBFGSB
+from optimizers import EvolutionaryAlgorithm, CMAES, LBFGSB
 from src.simple_mlp import SimpleMLP
 
 
@@ -12,30 +12,27 @@ class ExperimentRunner:
         self.hidden_sizes = hidden_sizes
         self.random_seed = random_seed
         
-    def run_single_trial(self, method_name, X_train, y_train, X_val,
-                         y_val, X_test, y_test, n_hidden, trial_idx):
-        np.random.seed(self.random_seed + trial_idx)
+    def run_single_trial(self, method_name, X_train, y_train, X_val, y_val, X_test, y_test, n_hidden, trial_idx):
         
+        np.random.seed(self.random_seed + trial_idx)
         mlp = SimpleMLP(n_in=X_train.shape[1], n_hidden=n_hidden, n_out=1)
         
         start_time = time.time()
         
         if method_name == "GA":
-            optimizer = EvolutionaryAlgorithm(mlp, X_train, y_train,
-                                        pop_size=30, n_generations=100, selection_method='tournament')
-            best_genome, history = optimizer.run()
+            opt = EvolutionaryAlgorithm(mlp, X_train, y_train, pop_size=30, n_generations=100,
+                                        selection_method='tournament')
         elif method_name == "CMAES":
-            optimizer = CMAES(mlp, X_train, y_train,
-                            pop_size=30, n_generations=100)
-            best_genome, history = optimizer.run()
+            opt = CMAES(mlp, X_train, y_train, pop_size=30, n_generations=100)
         elif method_name == "LBFGSB":
-            optimizer = LBFGSB(mlp, X_train, y_train, maxiter=500)
-            best_genome, history = optimizer.run()
+            opt = LBFGSB(mlp, X_train, y_train, maxiter=500)
         else:
             raise ValueError(f"Unknown method: {method_name}")
         
+        best_genome, history = opt.run()
+
         elapsed_time = time.time() - start_time
-        
+
         val_mse = mlp.calculate_mse(X_val, y_val, best_genome)
         test_mse = mlp.calculate_mse(X_test, y_test, best_genome)
         
