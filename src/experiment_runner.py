@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from optimizers import MyGA, CMAES, LBFGSB
+from src.optimizers import MyGA, CMAES, LBFGSB
 from src.simple_mlp import SimpleMLP
 
 
@@ -19,7 +19,7 @@ class ExperimentRunner:
         
         start_time = time.time()
         
-        if method_name == "GA":
+        if method_name == "MyGA":
             opt = MyGA(mlp, X_train, y_train, pop_size=30, n_generations=100, selection_method='tournament')
         elif method_name == "CMAES":
             opt = CMAES(mlp, X_train, y_train, pop_size=30, n_generations=100)
@@ -47,7 +47,7 @@ class ExperimentRunner:
     
     def run_experiment(self, X_train, y_train, X_val, y_val, X_test, y_test):
         results = []
-        methods = ["GA", "CMAES", "LBFGSB"]
+        methods = ["MyGA", "CMAES", "LBFGSB"]
         
         for method in methods:
             print(f"\n{'='*60}")
@@ -106,10 +106,9 @@ class ExperimentRunner:
         
         return summary
     
-    def run_training_size_experiment(self, train_sizes, X_val, y_val,
-                                     X_test, y_test, data_generator):
+    def run_training_size_experiment(self, train_sizes, X_val, y_val, X_test, y_test, data_generator):
         results = []
-        methods = ["GA", "CMAES", "LBFGSB"]
+        methods = ["MyGA", "CMAES", "LBFGSB"]
         
         for train_size in train_sizes:
             print(f"\n{'='*60}")
@@ -137,7 +136,7 @@ class ExperimentRunner:
                 avg_test_mse = np.mean([r['test_mse'] for r in results
                                        if r['method'] == method and
                                        r['train_size'] == train_size])
-                print(f"  Avg Test MSE: {avg_test_mse:.5f}                  ")
+                print(f"  Avg Test MSE: {avg_test_mse:.5f}")
         
         return results
 

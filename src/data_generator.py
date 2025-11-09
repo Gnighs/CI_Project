@@ -1,8 +1,7 @@
 import numpy as np
 
 class SyntheticDataGenerator:
-    def __init__(self, n_features=5, noise_level=0.1, hardness=1.0,
-                 random_seed=42):
+    def __init__(self, n_features=5, noise_level=0.1, hardness=1.0, random_seed=42):
         self.n_features = n_features
         self.noise_level = noise_level
         self.hardness = hardness
