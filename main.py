@@ -1,182 +1,29 @@
 import numpy as np
 import os
 import json
+
+from src.utils import ConfigManager, ExperimentManager
+
 from src.data_generator import SyntheticDataGenerator
 from src.experiment_runner import ExperimentRunner
 from src.visualization import Visualizer
 from src.statistical_analysis import StatisticalAnalyzer
 
 
-def get_experiment_config():
-    print("="*80)
-    print("EVOLUTIONARY ALGORITHMS FOR NEURAL NETWORK TRAINING")
-    print("="*80)
-    print("\nChoose experiment mode:")
-    print("  1. Quick test (2 trials, ~2-3 minutes)")
-    print("  2. Full experiment (30 trials, ~30-60 minutes)")
-    print("  3. Training size variation (5 sizes, ~15-20 minutes)")
-    print("  4. Custom configuration")
-    
-    while True:
-        choice = input("\nEnter your choice (1/2/3/4): ").strip()
-        
-        if choice == "1":
-            print("\n→ Quick test mode selected")
-            return {
-                'mode': 'standard',
-                'n_trials': 2,
-                'n_features': 5,
-                'noise_level': 0.1,
-                'hardness': 1.0,
-                'n_train': 100,
-                'n_val': 20,
-                'n_test': 200,
-                'hidden_sizes': [5, 10],
-                'random_seed': 42,
-                'output_dir': 'results'
-            }
-        elif choice == "2":
-            print("\n→ Full experiment mode selected")
-            return {
-                'mode': 'standard',
-                'n_trials': 30,
-                'n_features': 5,
-                'noise_level': 0.1,
-                'hardness': 1.0,
-                'n_train': 200,
-                'n_val': 40,
-                'n_test': 1000,
-                'hidden_sizes': [5, 10, 15, 20],
-                'random_seed': 42,
-                'output_dir': 'results'
-            }
-        elif choice == "3":
-            print("\n→ Training size variation experiment")
-            return {
-                'mode': 'train_size',
-                'n_trials': 10,
-                'n_features': 5,
-                'noise_level': 0.1,
-                'hardness': 1.0,
-                'train_sizes': [50, 100, 200, 400, 800],
-                'n_val': 40,
-                'n_test': 1000,
-                'random_seed': 42,
-                'output_dir': 'results'
-            }
-        elif choice == "4":
-            print("\n→ Custom configuration")
-            try:
-                n_trials = int(input("  Number of trials (default 30): ") or "30")
-                n_train = int(input("  Training samples (default 200): ") or "200")
-                hardness = float(input("  Problem hardness (0.5=easy, 1.0=normal, 2.0=hard): ") or "1.0")
-                hidden_input = input("  Hidden sizes (e.g., 5,10,15,20): ").strip()
-                hidden_sizes = [int(x) for x in hidden_input.split(",")] if hidden_input else [5, 10, 15, 20]
-                
-                return {
-                    'mode': 'standard',
-                    'n_trials': n_trials,
-                    'n_features': 5,
-                    'noise_level': 0.1,
-                    'hardness': hardness,
-                    'n_train': n_train,
-                    'n_val': 40,
-                    'n_test': 1000,
-                    'hidden_sizes': hidden_sizes,
-                    'random_seed': 42,
-                    'output_dir': 'results'
-                }
-            except (ValueError, KeyboardInterrupt):
-                print("  Invalid input. Please try again.")
-                continue
-        else:
-            print("  Invalid choice. Please enter 1, 2, 3, or 4.")
-
-
 def main():
-    config = get_experiment_config()
+    config = ConfigManager().get_experiment_config()
+
+    experiments = ExperimentManager(config)
+    results = experiments.run()
     
-    # Extract common configuration
-    mode = config.get('mode', 'standard')
-    n_trials = config['n_trials']
-    n_features = config['n_features']
-    noise_level = config['noise_level']
-    hardness = config.get('hardness', 1.0)
-    n_val = config['n_val']
-    n_test = config['n_test']
-    random_seed = config['random_seed']
     output_dir = config['output_dir']
-    
-    # Create output directory
-    os.makedirs(output_dir, exist_ok=True)
-    
-    print("\n" + "="*80)
-    print("CONFIGURATION")
-    print("="*80)
-    print(f"  Mode: {mode}")
-    print(f"  Trials: {n_trials}")
-    if mode == 'train_size':
-        print(f"  Training sizes: {config['train_sizes']}")
-    else:
-        print(f"  Training samples: {config['n_train']}")
-        print(f"  Hidden layer sizes: {config['hidden_sizes']}")
-    print(f"  Validation samples: {n_val}")
-    print(f"  Test samples: {n_test}")
-    print(f"  Noise level: {noise_level}")
-    print(f"  Problem hardness: {hardness}")
-    print("="*80)
-    
-    # Generate data
-    print("\nGenerating synthetic data...")
-    data_gen = SyntheticDataGenerator(
-        n_features=n_features,
-        noise_level=noise_level,
-        hardness=hardness,
-        random_seed=random_seed
+
+    runner = ExperimentRunner(
+        n_trials=config['n_trials'],
+        hidden_sizes=config.get('hidden_sizes', [10]),
+        random_seed=config['random_seed']
     )
-    
-    if mode == 'train_size':
-        # Training size variation experiment
-        train_sizes = config['train_sizes']
-        _, (X_val, y_val), (X_test, y_test) = \
-            data_gen.generate_train_val_test(100, n_val, n_test)
-        
-        print(f"  Validation set: {X_val.shape}")
-        print(f"  Test set: {X_test.shape}")
-        
-        runner = ExperimentRunner(
-            n_trials=n_trials,
-            hidden_sizes=[10],
-            random_seed=random_seed
-        )
-        
-        print("\nRunning training size variation experiments...")
-        results = runner.run_training_size_experiment(
-            train_sizes, X_val, y_val, X_test, y_test, data_gen
-        )
-    else:
-        # Standard experiment
-        n_train = config['n_train']
-        hidden_sizes = config['hidden_sizes']
-        
-        (X_train, y_train), (X_val, y_val), (X_test, y_test) = \
-            data_gen.generate_train_val_test(n_train, n_val, n_test)
-        
-        print(f"  Training set: {X_train.shape}")
-        print(f"  Validation set: {X_val.shape}")
-        print(f"  Test set: {X_test.shape}")
-        
-        runner = ExperimentRunner(
-            n_trials=n_trials,
-            hidden_sizes=hidden_sizes,
-            random_seed=random_seed
-        )
-        
-        print("\nRunning experiments...")
-        results = runner.run_experiment(
-            X_train, y_train, X_val, y_val, X_test, y_test
-        )
-    
+
     # Save raw results (remove history for JSON serialization)
     results_for_json = []
     for r in results:
@@ -211,7 +58,7 @@ def main():
     print("\nCreating visualizations...")
     viz = Visualizer()
     
-    if mode == 'train_size':
+    if config['mode'] == 'train_size':
         viz.plot_training_size_effect(
             results,
             os.path.join(output_dir, 'training_size_effect.png')
