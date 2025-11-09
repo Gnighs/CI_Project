@@ -84,7 +84,7 @@ CI_Project/
 │
 ├── src/                        # Source code directory
 │   ├── simple_mlp.py           # Multi-Layer Perceptron implementation
-│   ├── optimizer.py            # GA and CMA-ES implementations
+│   ├── optimizers.py           # MyGA, CMA-ES, and L-BFGS-B implementations
 │   ├── data_generator.py       # Synthetic data generation
 │   ├── experiment_runner.py    # Experiment orchestration and timing
 │   ├── visualization.py        # Plotting functions
