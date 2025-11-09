@@ -6,7 +6,7 @@
 
 This project explores the use of Evolutionary Algorithms (EAs) as an alternative to traditional derivative-based methods for training Artificial Neural Networks (ANNs). We compare three optimization approaches:
 
-- **Genetic Algorithm (GA)**: Classical evolutionary approach with selection, crossover, and mutation
+- **MyGA (Genetic Algorithm)**: Classical evolutionary approach with flexible selection methods (tournament/roulette), crossover, and mutation
 - **CMA-ES**: Covariance Matrix Adaptation Evolution Strategy, a more sophisticated EA
 - **L-BFGS-B**: Quasi-Newton derivative-based method (baseline)
 
@@ -79,7 +79,7 @@ CI_Project/
 │
 ├── README.md                   # Project documentation
 ├── requirements.txt            # Python dependencies
-├── main.py                     # Main experiment runner
+├── main.py                     # Main entry point (simplified orchestrator)
 ├── report.tex                  # LaTeX report (Introduction and Problem Setup)
 │
 ├── src/                        # Source code directory
@@ -87,6 +87,7 @@ CI_Project/
 │   ├── optimizers.py           # MyGA, CMA-ES, and L-BFGS-B implementations
 │   ├── data_generator.py       # Synthetic data generation
 │   ├── experiment_runner.py    # Experiment orchestration and timing
+│   ├── utils.py                # ExperimentManager, ResultsManager, and config
 │   ├── visualization.py        # Plotting functions
 │   └── statistical_analysis.py # Statistical tests and comparisons
 │
@@ -97,6 +98,17 @@ CI_Project/
     ├── statistical_tests.txt
     └── *.png (various plots)
 ```
+
+**Key Components:**
+
+- **`main.py`**: Simplified entry point that delegates to utility classes
+- **`utils.py`**: Contains `ExperimentManager` (runs experiments based on config), `ResultsManager` (saves and analyzes results), and `get_experiment_config()` (interactive menu)
+- **`optimizers.py`**: Implements `MyGA` (with tournament/roulette selection), `CMAES`, and `LBFGSB` classes
+- **`experiment_runner.py`**: Coordinates trial execution, architecture selection, and timing
+- **`simple_mlp.py`**: Genome-based neural network with forward pass and MSE calculation
+- **`data_generator.py`**: Creates synthetic regression data with controllable difficulty
+- **`statistical_analysis.py`**: Performs statistical tests (Wilcoxon, t-test, Mann-Whitney U)
+- **`visualization.py`**: Generates all plots (convergence curves, performance comparisons, etc.)
 
 ## 6. Reproducibility
 
