@@ -1,10 +1,9 @@
-import os
-import json
-
+from src.statistical_analysis import StatisticalAnalyzer
 from src.data_generator import SyntheticDataGenerator
 from src.experiment_runner import ExperimentRunner
-from src.statistical_analysis import StatisticalAnalyzer
 from src.visualization import Visualizer
+import json
+import os
 
 
 class ExperimentManager:
@@ -58,12 +57,14 @@ class ExperimentManager:
 
 
 class ResultsManager:
-    def __init__(self, output_dir):
+    def __init__(self, results, summary, output_dir):
+        self.results = results
+        self.summary = summary
         self.output_dir = output_dir
 
-    def save_raw_results(self, results):
+    def save_raw_results(self):
         clean_results = []
-        for r in results:
+        for r in self.results:
             rc = r.copy()
             rc.pop('history', None)
             rc.pop('all_histories', None)
@@ -74,33 +75,45 @@ class ResultsManager:
             json.dump(clean_results, f, indent=2)
         print(f"\nRaw results saved to {path}")
 
-
-    def save_summary(self, summary):
+    def save_summary(self):
         path = os.path.join(self.output_dir, 'summary.json')
         with open(path, 'w') as f:
-            json.dump(summary, f, indent=2)
+            json.dump(self.summary, f, indent=2)
         print(f"Summary saved to {path}")
 
-
-    def analysis(self, results, summary, mode):
+    def run_and_save_analysis(self):
         print("\nPerforming statistical analysis...")
         analyzer = StatisticalAnalyzer(alpha=0.05)
-        comparisons = analyzer.compare_all_methods(results)
+        comparisons = analyzer.compare_all_methods(self.results)
         stats_path = os.path.join(self.output_dir, 'statistical_tests.txt')
         analyzer.print_comparison_report(comparisons, stats_path)
 
+    def create_and_save_visualitzations(self, mode):
         print("\nCreating visualizations...")
         viz = Visualizer()
         if mode == 'train_size':
-            viz.plot_training_size_effect(results, os.path.join(self.output_dir, 'training_size_effect.png'))
+            viz.plot_training_size_effect(self.results, os.path.join(self.output_dir, 'training_size_effect.png'))
         else:
-            viz.plot_convergence_curves(results, os.path.join(self.output_dir, 'convergence_analysis.png'))
-            viz.plot_performance_comparison(results, os.path.join(self.output_dir, 'performance_comparison.png'))
-            viz.plot_time_comparison(summary, os.path.join(self.output_dir, 'time_comparison.png'))
-            viz.plot_hidden_neurons_distribution(results, os.path.join(self.output_dir, 'hidden_distribution.png'))
-            viz.create_summary_table(summary, os.path.join(self.output_dir, 'summary_table.txt'))
+            viz.plot_convergence_curves(self.results, os.path.join(self.output_dir, 'convergence_analysis.png'))
+            viz.plot_performance_comparison(self.results, os.path.join(self.output_dir, 'performance_comparison.png'))
+            viz.plot_time_comparison(self.summary, os.path.join(self.output_dir, 'time_comparison.png'))
+            viz.plot_hidden_neurons_distribution(self.results, os.path.join(self.output_dir, 'hidden_distribution.png'))
+            viz.create_summary_table(self.summary, os.path.join(self.output_dir, 'summary_table.txt'))
 
-
+    def print_summary(self):
+        print("\n" + "="*80)
+        print("RESULTS SUMMARY")
+        print("="*80)
+        
+        for method, stats in self.summary.items():
+            print(f"\n{method}:")
+            print(f"  Test MSE:  {stats['test_mse_mean']:.6f} ± {stats['test_mse_std']:.6f}")
+            print(f"  Time:      {stats['time_mean']:.2f}s ± {stats['time_std']:.2f}s")
+            print(f"  Hidden:    {int(stats['hidden_mode'])} neurons (most common)")
+        
+        print("\n" + "="*80)
+        print(f"All results saved to '{self.output_dir}/' directory")
+        print("="*80)
 
 def get_experiment_config():
     print("="*80)
