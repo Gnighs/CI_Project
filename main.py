@@ -3,12 +3,7 @@ import os
 import json
 
 from src.utils import ExperimentManager, ResultsManager, get_experiment_config
-
-from src.data_generator import SyntheticDataGenerator
 from src.experiment_runner import ExperimentRunner
-from src.visualization import Visualizer
-from src.statistical_analysis import StatisticalAnalyzer
-
 
 def main():
     config = get_experiment_config()
@@ -48,6 +43,7 @@ def main():
     print("="*80)
     
     input("\nPress Enter to exit...")
+    
 
 if __name__ == "__main__":
     main()
