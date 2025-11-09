@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from optimizers import MyGA, CMAES, LBFGSB
+from src.optimizers import MyGA, CMAES, LBFGSB
 from src.simple_mlp import SimpleMLP
 
 
