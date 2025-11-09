@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 from scipy.spatial.distance import pdist
 import random
 
-class EvolutionaryAlgorithm:
+class MyGA:
     def __init__(self, mlp, X, y, pop_size=20, mutation_rate=0.1, mutation_scale=0.1,
                  n_generations=50, n_elite=5, selection_method = 'roulette'):
         
