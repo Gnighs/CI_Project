@@ -11,7 +11,6 @@ class Visualizer:
         fig, axes = plt.subplots(2, 2, figsize=(14, 10))
         colors = {'MyGA': '#1f77b4', 'CMAES': '#ff7f0e', 'LBFGSB': '#2ca02c'}
 
-        # --- Top-left: MyGA & CMAES convergence ---
         for method in ["MyGA", "CMAES"]:
             method_results = [r for r in results if r['method'] == method]
             if not method_results:
@@ -37,7 +36,6 @@ class Visualizer:
         axes[0, 0].legend(fontsize=10)
         axes[0, 0].grid(True, alpha=0.3)
 
-        # --- Top-right: LBFGSB convergence ---
         method = "LBFGSB"
         method_results = [r for r in results if r['method'] == method]
         if method_results:
@@ -59,7 +57,6 @@ class Visualizer:
         axes[0, 1].legend(fontsize=10)
         axes[0, 1].grid(True, alpha=0.3)
 
-        # --- Bottom-left: Diversity ---
         for method in ["MyGA", "CMAES"]:
             method_results = [r for r in results if r['method'] == method]
             all_histories = [r['history'] for r in method_results if 'history' in r and r['history'] and 'diversity' in r['history']]
@@ -78,19 +75,28 @@ class Visualizer:
         axes[1, 0].legend(fontsize=10)
         axes[1, 0].grid(True, alpha=0.3)
 
-        # --- Bottom-right: Final fitness distribution ---
         methods = ["MyGA", "CMAES", "LBFGSB"]
         for method in methods:
             method_results = [r for r in results if r['method'] == method]
             final_test_mses = [-r['test_mse'] for r in method_results if 'test_mse' in r]
+            
             if final_test_mses:
-                axes[1, 1].hist(final_test_mses, bins=15, alpha=0.6, label=method, color=colors[method])
-        
+                min_val = min(final_test_mses)
+                max_val = max(final_test_mses)
+                bin_start = np.floor(min_val * 10) / 10
+                bin_end = np.ceil(max_val * 10) / 10
+                bins = np.linspace(bin_start, bin_end, 15)
+
+                axes[1, 1].hist(final_test_mses, bins=bins, alpha=0.6, label=method, color=colors[method])
+
         axes[1, 1].set_xlabel('Final Fitness (-Test MSE)', fontsize=11)
         axes[1, 1].set_ylabel('Frequency', fontsize=11)
         axes[1, 1].set_title('Final Fitness Distribution', fontsize=13, fontweight='bold')
         axes[1, 1].legend(fontsize=10)
         axes[1, 1].grid(True, alpha=0.3, axis='y')
+
+        axes[1, 1].set_xticks(np.round(bins, 2))
+        axes[1, 1].set_xticklabels([f"{b:.2f}" for b in bins], rotation=45)
 
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')

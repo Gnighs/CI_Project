@@ -5,54 +5,54 @@ STATISTICAL COMPARISON REPORT
 
 CMAES_vs_LBFGSB:
 ------------------------------------------------------------
-  Mean Difference: 0.000118
-  Cohen's d (Effect Size): 0.1298
-
-  Wilcoxon Signed-Rank Test (paired):
-    p-value: 0.935399
-    Significant: False
-
-  Paired t-test:
-    p-value: 0.626433
-    Significant: False
-
-  Mann-Whitney U Test (unpaired):
-    p-value: 0.784460
-    Significant: False
-
-
-CMAES_vs_MyGA:
-------------------------------------------------------------
-  Mean Difference: -0.000739
-  Cohen's d (Effect Size): -0.3046
+  Mean Difference: 0.001138
+  Cohen's d (Effect Size): 1.0189
 
   Wilcoxon Signed-Rank Test (paired):
     p-value: 0.000872
     Significant: True
 
   Paired t-test:
-    p-value: 0.242707
+    p-value: 0.000478
+    Significant: True
+
+  Mann-Whitney U Test (unpaired):
+    p-value: 0.007617
+    Significant: True
+
+
+CMAES_vs_MyGA:
+------------------------------------------------------------
+  Mean Difference: -0.000329
+  Cohen's d (Effect Size): -0.1108
+
+  Wilcoxon Signed-Rank Test (paired):
+    p-value: 0.597808
+    Significant: False
+
+  Paired t-test:
+    p-value: 0.668738
     Significant: False
 
   Mann-Whitney U Test (unpaired):
-    p-value: 0.002891
-    Significant: True
+    p-value: 0.970516
+    Significant: False
 
 
 LBFGSB_vs_MyGA:
 ------------------------------------------------------------
-  Mean Difference: -0.000857
-  Cohen's d (Effect Size): -0.3663
+  Mean Difference: -0.001467
+  Cohen's d (Effect Size): -0.5329
 
   Wilcoxon Signed-Rank Test (paired):
-    p-value: 0.019661
+    p-value: 0.024786
     Significant: True
 
   Paired t-test:
-    p-value: 0.171532
-    Significant: False
+    p-value: 0.048542
+    Significant: True
 
   Mann-Whitney U Test (unpaired):
-    p-value: 0.001857
-    Significant: True
+    p-value: 0.079782
+    Significant: False
 
