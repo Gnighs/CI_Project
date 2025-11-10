@@ -9,8 +9,8 @@ class Visualizer:
     
     def plot_convergence_curves(self, results, output_file='convergence.png'):
         fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-        methods = ["GA", "CMAES", "LBFGSB"]
-        colors = {'GA': '#1f77b4', 'CMAES': '#ff7f0e', 'LBFGSB': '#2ca02c'}
+        methods = ["MyGA", "CMAES", "LBFGSB"]
+        colors = {'MyGA': '#1f77b4', 'CMAES': '#ff7f0e', 'LBFGSB': '#2ca02c'}
         
         for method in methods:
             method_results = [r for r in results if r['method'] == method]
@@ -55,7 +55,7 @@ class Visualizer:
         axes[0].grid(True, alpha=0.3)
         
         # Diversity plot
-        for method in ["GA", "CMAES"]:
+        for method in ["MyGA", "CMAES"]:
             method_results = [r for r in results if r['method'] == method]
             if not method_results:
                 continue
@@ -214,7 +214,7 @@ class Visualizer:
                                   output_file='training_size_effect.png'):
         fig, axes = plt.subplots(1, 2, figsize=(14, 5))
         methods = sorted(set([r['method'] for r in train_size_results]))
-        colors = {'GA': '#1f77b4', 'CMAES': '#ff7f0e', 'LBFGSB': '#2ca02c'}
+        colors = {'MyGA': '#1f77b4', 'CMAES': '#ff7f0e', 'LBFGSB': '#2ca02c'}
         
         # Group by method and train size
         data_by_method = {m: {} for m in methods}
