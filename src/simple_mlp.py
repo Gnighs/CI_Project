@@ -31,7 +31,10 @@ class SimpleMLP:
         W1, b1, W2, b2 = self._decode_weights(genome)
         
         hidden_values = X.dot(W1) + b1
-        hidden_values = np.maximum(0, hidden_values) # ReLU
+        # hidden_values = np.maximum(0, hidden_values) # ReLU
+
+        hidden_values = 1.0 / (1.0 + np.exp(-hidden_values)) # Sigmoid
+
         output_values = hidden_values.dot(W2) + b2
 
         return output_values

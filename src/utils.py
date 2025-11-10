@@ -135,11 +135,11 @@ def get_experiment_config():
                 'n_trials': 2,
                 'n_features': 5,
                 'noise_level': 0.1,
-                'hardness': 1.0,
-                'n_train': 100,
-                'n_val': 20,
+                'hardness': 0.2,
+                'n_train': 500,
+                'n_val': 100,
                 'n_test': 200,
-                'hidden_sizes': [5, 10],
+                'hidden_sizes': [5, 10, 25, 50],
                 'random_seed': 42,
                 'output_dir': 'results'
             }
@@ -151,12 +151,12 @@ def get_experiment_config():
                 'n_features': 5,
                 'noise_level': 0.1,
                 'hardness': 1.0,
-                'n_train': 200,
-                'n_val': 40,
+                'n_train': 300,
+                'n_val': 60,
                 'n_test': 1000,
-                'hidden_sizes': [5, 10, 15, 20],
+                'hidden_sizes': [5, 10, 15, 20, 25, 50],
                 'random_seed': 42,
-                'output_dir': 'results'
+                'output_dir': 'results_standard_diff'
             }
         elif choice == "3":
             print("\n→ Training size variation experiment")

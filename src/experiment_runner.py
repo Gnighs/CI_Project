@@ -20,9 +20,9 @@ class ExperimentRunner:
         start_time = time.time()
         
         if method_name == "MyGA":
-            opt = MyGA(mlp, X_train, y_train, pop_size=30, n_generations=100, selection_method='tournament')
+            opt = MyGA(mlp, X_train, y_train, pop_size=50, n_generations=50, n_elite=5, selection_method='tournament')
         elif method_name == "CMAES":
-            opt = CMAES(mlp, X_train, y_train, pop_size=30, n_generations=100)
+            opt = CMAES(mlp, X_train, y_train, pop_size=50, n_generations=50)
         elif method_name == "LBFGSB":
             opt = LBFGSB(mlp, X_train, y_train, maxiter=500)
         else:
