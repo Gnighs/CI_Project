@@ -42,7 +42,7 @@ class MyGA:
         idx = np.random.choice(len(self.population), size=2, p=probs, replace=False)
         return self.population[idx[0]], self.population[idx[1]]
 
-    def _tournament_selection(self, fitnesses, k=4):
+    def _tournament_selection(self, fitnesses, k=3):
         idx = np.random.choice(len(self.population), size=k, replace=False)
         selected = sorted(idx, key=lambda i: fitnesses[i], reverse=True)
         return self.population[selected[0]], self.population[selected[1]]
@@ -51,7 +51,7 @@ class MyGA:
         if self.selection_method == 'roulette':
             return self._roulette_selection(fitnesses)
         elif self.selection_method == 'tournament':
-            return self._tournament_selection(fitnesses, k=3)
+            return self._tournament_selection(fitnesses, k=5)
 
     def _crossover(self, parent1, parent2):
         point = np.random.randint(1, self.genome_length)

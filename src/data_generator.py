@@ -28,14 +28,14 @@ class SyntheticDataGenerator:
         
         return X, y
     
-    def generate_train_val_test(self, n_train=200, n_val=40, n_test=1000):
-        X_train, y_train = self.generate_data(n_train)
+    def generate_train_val_test(self, n_train=500, n_val=100, n_test=200):
+        X, y = self.generate_data(n_train + n_val + n_test)
+
+        X_train, y_train = X[:n_train], y[:n_train]
         
-        self.random_seed += 1000
-        X_val, y_val = self.generate_data(n_val)
+        X_val, y_val = X[n_train:n_train + n_val], y[n_train:n_train + n_val]
         
-        self.random_seed += 1000
-        X_test, y_test = self.generate_data(n_test)
+        X_test, y_test = X[n_train + n_val:], y[n_train + n_val:]
         
         return (X_train, y_train), (X_val, y_val), (X_test, y_test)
     
