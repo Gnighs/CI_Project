@@ -8,98 +8,95 @@ class Visualizer:
         sns.set_style("whitegrid")
     
     def plot_convergence_curves(self, results, output_file='convergence.png'):
-        fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-        methods = ["MyGA", "CMAES", "LBFGSB"]
+        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
         colors = {'MyGA': '#1f77b4', 'CMAES': '#ff7f0e', 'LBFGSB': '#2ca02c'}
-        
-        for method in methods:
-            method_results = [r for r in results if r['method'] == method]
-            if not method_results:
-                continue
-            
-            # Collect all histories
-            all_histories = []
-            for r in method_results:
-                if 'history' in r and r['history']:
-                    all_histories.append(r['history'])
-            
-            if not all_histories:
-                continue
-            
-            # Average convergence curve
-            if method == "LBFGSB":
-                x_key, y_key = 'iterations', 'fitness'
-            else:
-                x_key, y_key = 'generations', 'best_fitness'
-            
-            # Find common length
-            min_len = min(len(h[x_key]) for h in all_histories)
-            
-            avg_fitness = np.mean([h[y_key][:min_len] for h in all_histories],
-                                 axis=0)
-            std_fitness = np.std([h[y_key][:min_len] for h in all_histories],
-                                axis=0)
-            x_vals = list(range(1, min_len + 1))
-            
-            axes[0].plot(x_vals, avg_fitness, label=method,
-                        color=colors[method], linewidth=2)
-            axes[0].fill_between(x_vals,
-                                avg_fitness - std_fitness,
-                                avg_fitness + std_fitness,
-                                alpha=0.2, color=colors[method])
-        
-        axes[0].set_xlabel('Generation / Iteration', fontsize=11)
-        axes[0].set_ylabel('Best Fitness (-MSE)', fontsize=11)
-        axes[0].set_title('Convergence Curves', fontsize=13, fontweight='bold')
-        axes[0].legend(fontsize=10)
-        axes[0].grid(True, alpha=0.3)
-        
-        # Diversity plot
+
+        # --- Top-left: MyGA & CMAES convergence ---
         for method in ["MyGA", "CMAES"]:
             method_results = [r for r in results if r['method'] == method]
             if not method_results:
                 continue
             
-            all_histories = [r['history'] for r in method_results
-                           if 'history' in r and r['history'] and
-                           'diversity' in r['history']]
+            all_histories = [r['history'] for r in method_results if 'history' in r and r['history']]
+            if not all_histories:
+                continue
             
+            x_key, y_key = 'generations', 'best_fitness'
+            min_len = min(len(h[x_key]) for h in all_histories)
+            avg_fitness = np.mean([h[y_key][:min_len] for h in all_histories], axis=0)
+            std_fitness = np.std([h[y_key][:min_len] for h in all_histories], axis=0)
+            x_vals = list(range(1, min_len + 1))
+            
+            axes[0, 0].plot(x_vals, avg_fitness, label=method, color=colors[method], linewidth=2)
+            axes[0, 0].fill_between(x_vals, avg_fitness - std_fitness, avg_fitness + std_fitness,
+                                    alpha=0.2, color=colors[method])
+        
+        axes[0, 0].set_xlabel('Generation', fontsize=11)
+        axes[0, 0].set_ylabel('Best Fitness (-MSE)', fontsize=11)
+        axes[0, 0].set_title('Convergence: MyGA & CMAES', fontsize=13, fontweight='bold')
+        axes[0, 0].legend(fontsize=10)
+        axes[0, 0].grid(True, alpha=0.3)
+
+        # --- Top-right: LBFGSB convergence ---
+        method = "LBFGSB"
+        method_results = [r for r in results if r['method'] == method]
+        if method_results:
+            all_histories = [r['history'] for r in method_results if 'history' in r and r['history']]
+            if all_histories:
+                x_key, y_key = 'iterations', 'fitness'
+                min_len = min(len(h[x_key]) for h in all_histories)
+                avg_fitness = np.mean([h[y_key][:min_len] for h in all_histories], axis=0)
+                std_fitness = np.std([h[y_key][:min_len] for h in all_histories], axis=0)
+                x_vals = list(range(1, min_len + 1))
+                
+                axes[0, 1].plot(x_vals, avg_fitness, label=method, color=colors[method], linewidth=2)
+                axes[0, 1].fill_between(x_vals, avg_fitness - std_fitness, avg_fitness + std_fitness,
+                                        alpha=0.2, color=colors[method])
+        
+        axes[0, 1].set_xlabel('Iteration', fontsize=11)
+        axes[0, 1].set_ylabel('Best Fitness (-MSE)', fontsize=11)
+        axes[0, 1].set_title('Convergence: LBFGSB', fontsize=13, fontweight='bold')
+        axes[0, 1].legend(fontsize=10)
+        axes[0, 1].grid(True, alpha=0.3)
+
+        # --- Bottom-left: Diversity ---
+        for method in ["MyGA", "CMAES"]:
+            method_results = [r for r in results if r['method'] == method]
+            all_histories = [r['history'] for r in method_results if 'history' in r and r['history'] and 'diversity' in r['history']]
             if not all_histories:
                 continue
             
             min_len = min(len(h['diversity']) for h in all_histories)
-            avg_diversity = np.mean([h['diversity'][:min_len]
-                                    for h in all_histories], axis=0)
+            avg_diversity = np.mean([h['diversity'][:min_len] for h in all_histories], axis=0)
             x_vals = list(range(1, min_len + 1))
             
-            axes[1].plot(x_vals, avg_diversity, label=method,
-                        color=colors[method], linewidth=2)
+            axes[1, 0].plot(x_vals, avg_diversity, label=method, color=colors[method], linewidth=2)
         
-        axes[1].set_xlabel('Generation', fontsize=11)
-        axes[1].set_ylabel('Population Diversity', fontsize=11)
-        axes[1].set_title('Diversity Over Time', fontsize=13, fontweight='bold')
-        axes[1].legend(fontsize=10)
-        axes[1].grid(True, alpha=0.3)
-        
-        # Fitness distribution at final generation
+        axes[1, 0].set_xlabel('Generation', fontsize=11)
+        axes[1, 0].set_ylabel('Population Diversity', fontsize=11)
+        axes[1, 0].set_title('Diversity Over Time', fontsize=13, fontweight='bold')
+        axes[1, 0].legend(fontsize=10)
+        axes[1, 0].grid(True, alpha=0.3)
+
+        # --- Bottom-right: Final fitness distribution ---
+        methods = ["MyGA", "CMAES", "LBFGSB"]
         for method in methods:
             method_results = [r for r in results if r['method'] == method]
-            final_test_mses = [-r['test_mse'] for r in method_results]
-            
-            axes[2].hist(final_test_mses, bins=15, alpha=0.6,
-                        label=method, color=colors[method])
+            final_test_mses = [-r['test_mse'] for r in method_results if 'test_mse' in r]
+            if final_test_mses:
+                axes[1, 1].hist(final_test_mses, bins=15, alpha=0.6, label=method, color=colors[method])
         
-        axes[2].set_xlabel('Final Fitness (-Test MSE)', fontsize=11)
-        axes[2].set_ylabel('Frequency', fontsize=11)
-        axes[2].set_title('Final Fitness Distribution', fontsize=13,
-                         fontweight='bold')
-        axes[2].legend(fontsize=10)
-        axes[2].grid(True, alpha=0.3, axis='y')
-        
+        axes[1, 1].set_xlabel('Final Fitness (-Test MSE)', fontsize=11)
+        axes[1, 1].set_ylabel('Frequency', fontsize=11)
+        axes[1, 1].set_title('Final Fitness Distribution', fontsize=13, fontweight='bold')
+        axes[1, 1].legend(fontsize=10)
+        axes[1, 1].grid(True, alpha=0.3, axis='y')
+
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"Saved convergence analysis to {output_file}")
+
         
     def plot_convergence(self, convergence_data, output_file='convergence.png'):
         plt.figure(figsize=self.figsize)
